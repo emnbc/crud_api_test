@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -25,13 +27,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Неверный email или пароль"));
+                .orElseThrow(() -> new RuntimeException("Incorrect email address or password is specified."));
 
         if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             String token = jwtUtil.generateToken(user.getEmail());
-            return ResponseEntity.ok().body(token);
+            return ResponseEntity.ok().body(Map.of("accessToken", token));
         } else {
-            return ResponseEntity.status(401).body("Неверный email или пароль");
+            return ResponseEntity.status(401).body("Incorrect email address or password is specified.");
         }
     }
 }
